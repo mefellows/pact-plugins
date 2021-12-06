@@ -27,74 +27,39 @@ import static org.hamcrest.Matchers.matchesRegex;
 @ExtendWith(PactConsumerTestExt.class)
 class CsvClientTest {
   @Pact(consumer = "CsvClient")
-  V4Pact pact(PactBuilder builder) {
-    return builder
-      .usingPlugin("csv")
-      .expectsToReceive("request for a report", "core/interaction/http")
-      .with(Map.of(
-        "request.path", "/reports/report001.csv",
-        "response.status", "200",
-        "response.contents", Map.of(
-          "pact:content-type", "text/csv",
-          "csvHeaders", false,
-          "column:1", "matching(type,'Name')",
-          "column:2", "matching(number,100)",
-          "column:3", "matching(datetime, 'yyyy-MM-dd','2000-01-01')"
-        )
-      ))
-      .toPact();
-  }
-
-  @Pact(consumer = "CsvClient")
   V4Pact csvWithHeaders(PactBuilder builder) {
     return builder
-      .usingPlugin("csv")
-      .expectsToReceive("request for a report with headers", "core/interaction/http")
-      .with(Map.of(
-        "request.path", "/reports/report002.csv",
-        "response.status", "200",
-        "response.contents", Map.of(
-          "pact:content-type", "text/csv",
-          "csvHeaders", true,
-          "column:Name", "matching(type,'Name')",
-          "column:Number", "matching(number,100)",
-          "column:Date", "matching(datetime, 'yyyy-MM-dd','2000-01-01')"
-        )
-      ))
-      .toPact();
+        .usingPlugin("csv")
+        .expectsToReceive("request for a report with headers", "core/interaction/http")
+        .with(Map.of(
+            "request.path", "/reports/report002.csv",
+            "response.status", "200",
+            "response.contents", Map.of(
+                "pact:content-type", "text/csv",
+                "csvHeaders", true,
+                "column:Name", "matching(type,'Name')",
+                "column:Number", "matching(number,100)",
+                "column:Date", "matching(datetime, 'yyyy-MM-dd','2000-01-01')")))
+        .toPact();
   }
 
   @Pact(consumer = "CsvClient")
   V4Pact pact2(PactBuilder builder) {
     return builder
-      .usingPlugin("csv")
-      .expectsToReceive("request for to store a report", "core/interaction/http")
-      .with(
-        Map.of(
-          "request.path", "/reports/report001.csv",
-          "request.method", "POST",
-          "request.contents", Map.of(
-            "pact:content-type", "text/csv",
-            "csvHeaders", false,
-            "column:1", "matching(type,'Name')",
-            "column:2", "matching(number,100)",
-            "column:3", "matching(datetime, 'yyyy-MM-dd','2000-01-01')"
-            ),
-          "response.status", "201"
-        )
-      )
-      .toPact();
-  }
-
-  @Test
-  @PactTestFor(providerName = "CsvServer", pactMethod = "pact")
-  void getCsvReport(MockServer mockServer) throws IOException {
-    CsvClient client = new CsvClient(mockServer.getUrl());
-    List<CSVRecord> csvData = client.fetch("report001.csv", false);
-    assertThat(csvData.size(), is(1));
-    assertThat(csvData.get(0).get(0), is(equalTo("Name")));
-    assertThat(csvData.get(0).get(1), is(equalTo("100")));
-    assertThat(csvData.get(0).get(2), matchesRegex("\\d{4}-\\d{2}-\\d{2}"));
+        .usingPlugin("csv")
+        .expectsToReceive("request for to store a report", "core/interaction/http")
+        .with(
+            Map.of(
+                "request.path", "/reports/report001.csv",
+                "request.method", "POST",
+                "request.contents", Map.of(
+                    "pact:content-type", "text/csv",
+                    "csvHeaders", false,
+                    "column:1", "matching(type,'Name')",
+                    "column:2", "matching(number,100)",
+                    "column:3", "matching(datetime, 'yyyy-MM-dd','2000-01-01')"),
+                "response.status", "201"))
+        .toPact();
   }
 
   @Test
