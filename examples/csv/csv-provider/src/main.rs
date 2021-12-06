@@ -2,7 +2,7 @@ use actix_web::error::ErrorBadRequest;
 use actix_web::{get, post, App, HttpResponse, HttpServer};
 use anyhow::anyhow;
 use csv::{ReaderBuilder, StringRecord, Writer};
-use fakeit::{datetime, name};
+use fakeit::{datetime, job, name};
 use log::*;
 use rand::prelude::*;
 
@@ -11,7 +11,7 @@ async fn data() -> HttpResponse {
   debug!("GET request for report");
   let rows: u8 = random();
   let mut wtr = Writer::from_writer(vec![]);
-  let _ = wtr.write_record(&["Name", "Number", "Date"]);
+  let _ = wtr.write_record(&["Name", "Occupation", "Number", "Date"]);
 
   for _row in 0..(rows + 1) {
     let num: u8 = random();
@@ -19,6 +19,7 @@ async fn data() -> HttpResponse {
     let day = datetime::day().parse::<u8>().unwrap_or_default();
     let _ = wtr.write_record(&[
       name::full().as_str(),
+      job::title().as_str(),
       num.to_string().as_str(),
       format!("{}-{:02}-{:02}", datetime::year(), month, day).as_str(),
     ]);
